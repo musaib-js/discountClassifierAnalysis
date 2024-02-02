@@ -16,15 +16,17 @@ def load_data(file_name):
 
 def get_predictions(data):
     try:
-        for index, row in data.iterrows():
+        unique_data = data[['Parsippany']].drop_duplicates()
+        
+        for index, row in unique_data.iterrows():
             if pd.notna(row['Parsippany']):
                 text_value = row['Parsippany']
                 payload = {"text": text_value}
                 response = requests.post(str(os.getenv('URL')), json=payload)
                 jsonResponse = response.json()
-                data.at[index, 'BiLSTM Prediction'] = jsonResponse['message'] 
+                unique_data.at[index, 'BiLSTM Prediction'] = jsonResponse['message'] 
         timestamp = pd.Timestamp.now().strftime("%Y%m%d%H%M%S")            
-        data.to_excel(f"predictions_{timestamp}.xlsx", index=False)
+        unique_data.to_excel(f"predictions_{timestamp}.xlsx", index=False)
         return True
 
     except Exception as e:
